@@ -1,0 +1,24 @@
+sudo: required
+services: 
+  - docker
+
+before_install:
+  - docker build -t poom9091/react-test -f ./client/Dockerfile.dev ./client
+
+script: 
+  - docker run poom9091/react-test npm test -- --coverage
+
+after_success: 
+  - docker build -t poom9091/multi-client ./client 
+  - docker build -t poom9091/multi-nginx ./nginx
+  - docker build -t poom9091/multi-server ./server
+  - docker build -t poom9091/multi-worker ./worker
+#docker login
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID"  --password-stdin 
+#docker push 
+  - docker push poom9091/multi-client 
+  - docker push poom9091/multi-nginx 
+  - docker push poom9091/multi-server 
+  - docker push poom9091/multi-worker
+
+
